@@ -42,12 +42,15 @@ const Header = ({imageUpdate, route, discardChanges}) => {
             />
         </Pressable>
         ): ''}
+        <Pressable onPress={navigation.navigate('Profile')} >
           <Image 
               source={require('../assets/images/logo.png')}
               accessible={true}
               accessibilityLabel={'Little Lemon Logo'}
               style={styles.logo}
           />
+        </Pressable>
+
           
         {image ? (<Image style={styles.avatar} accessible={true} accessibilityLabel={'avatar'} source={{ uri: image }} />) : (
           <Image style={styles.avatar} accessible={true} accessibilityLabel={'avatar'} source={require('../assets/images/avatar.png')} /> 
