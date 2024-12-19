@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "littleLemon",
+    "slug": "littleLemon",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/little-lemon-logo.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/images/little-lemon-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/little-lemon-logo.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "favicon": "./assets/images/llogo.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      ["expo-image-picker",
+      {
+        "photosPermission": "The app accesses your photos to let you share them with your friends."
+      }]
+    ]
+  }
+}
