@@ -34,7 +34,7 @@ const Header = ({imageUpdate, route, discardChanges}) => {
             if(route == 'Profile') {
               discardChanges();
             }
-            navigation.goBack()
+            navigation.goBack();
           }} >
           <Image source={require('../assets/images/back-arrow.png')}
                 accessible={true}
@@ -51,7 +51,7 @@ const Header = ({imageUpdate, route, discardChanges}) => {
         />
 
         {route == 'Onboarding' ? '' : (
-          <Pressable onPress={navigation.navigate('Profile')} > 
+          <Pressable onPress={()=>{navigation.navigate("Profile")}} > 
             {  
             image ? (
               <Image style={styles.avatar} accessible={true} accessibilityLabel={'avatar'} source={{ uri: image }} />) : (

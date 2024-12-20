@@ -39,41 +39,7 @@ const Item = ({ name, description, price, image }) => (
 );
 
 export default function Home() {
-  const [data, setData] = useState([    {
-    "name": "Greek Salad",
-    "price": 12.99,
-    "description": "Our delicious salad is served with Feta cheese and peeled cucumber. Includes tomatoes, onions, olives, salt and oregano in the ingredients.",
-    "image": "greekSalad.jpg",
-    "category": "starters"
-  },
-  {
-    "name": "Bruschetta",
-    "price": 7.99,
-    "description": "Delicious grilled bread rubbed with garlic and topped with olive oil and salt. Our Bruschetta includes tomato and cheese.",
-    "image": "bruschetta.jpg",
-    "category": "starters"
-  },
-  {
-    "name": "Grilled Fish",
-    "price": 20.00,
-    "description": "Fantastic grilled fish seasoned with salt.",
-    "image": "grilledFish.jpg",
-    "category": "mains"
-  },
-  {
-    "name": "Pasta",
-    "price": 6.99,
-    "description": "Delicious pasta for your delight.",
-    "image": "pasta.jpg",
-    "category": "mains"      
-  },
-  {
-    "name": "Lemon Dessert",
-    "price": 4.99,
-    "description": "You can't go wrong with this delicious lemon dessert!",
-    "image": "lemonDessert.jpg",
-    "category": "desserts"      
-  }]);
+  const [data, setData] = useState([]);
   const [searchBarText, setSearchBarText] = useState('');
   const [query, setQuery] = useState('');
   const [filterSelections, setFilterSelections] = useState(
@@ -90,17 +56,13 @@ export default function Home() {
       }
       const json = await response.json();
       const menu = json.menu;
-      console.log('json: ' + json)
-      console.log(menu)
-      // setData(menu)
-      return  menu;
+      setData(menu);
+      return menu;
     } catch (error) {
       console.error(error.message);
       console.log(e.message)
     }
   }
-
-  console.log(data)
 
   useEffect(() => {
     (async () => {
@@ -111,13 +73,11 @@ export default function Home() {
           const fetchedMenu = await fetchData();
           saveMenuItems(fetchedMenu);
           console.log(fetchedMenu);
+          setData(fetchedMenu);
         }
-        //const sectionListData = getSectionListData(fetchedMenu);
-        //setData(sectionListData);
-       
       } catch (e) {
         // Handle error
-        //Alert.alert(e.message);
+        Alert.alert(e.message);
         console.log(e.message)
       }
     })();
@@ -131,36 +91,16 @@ export default function Home() {
         }
         return filterSelections[i];
       });
+      console.log(query)
+      console.log(activeCategories)
       try {
         const menuItems = await filterByQueryAndCategories(
           query,
           activeCategories
         );
-        
-    //     return db.executeSql(`SELECT * FROM menuitems WHERE category IN (${categories}) ${title}`,
-    //       activeCategories,
-    //       (_, { rows }) => {
-    //         resolve(rows._array);
-    //       });
-    // }).then(() => console.log('data filtered'))
-
-      let array;
-
-      const categoryFiltered = menuItems.filter(item => {
-        activeCategories.map(cat => cat == item.category)
-      });
-
-      if(query.length > 0) {
-        array = categoryFiltered.filter(item => item.indexOf(query) > 0);
-      } else {
-        array = categoryFiltered
-      }
-
-
-        setData(array);
-        // setData(menuItems);
+        setData(menuItems);
       } catch (e) {
-        //Alert.alert(e.message);
+        Alert.alert(e.message);
         console.log(e.message)
       }
     })();

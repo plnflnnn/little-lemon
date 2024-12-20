@@ -1,11 +1,15 @@
 import { NavigationContainer } from "@react-navigation/native";
 import RootNavigator from "./navigators/RootNavigator";
 import './gesture-handler.native'
-// App.js is already setup by wrapping NavigationContainer around Root Navigator
+import { SQLiteProvider, useSQLiteContext } from 'expo-sqlite';
+import { initializeDatabase } from "./database";
+
 export default function App() {
   return (
-    <NavigationContainer>
-      <RootNavigator />
-    </NavigationContainer>
+    // <SQLiteProvider databaseName="ittle_lemon.db" onInit={initializeDatabase}>
+      <NavigationContainer>
+        <RootNavigator />
+      </NavigationContainer>
+    // </SQLiteProvider>
   );
 }

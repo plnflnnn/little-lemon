@@ -84,16 +84,16 @@ const RootNavigator = () => {
         <Drawer.Screen name="Home" options={{navigation}} component={Home} />
         {/* <Drawer.Screen name="Profile" options={{navigation }} component={Profile} /> */}
 
-        {/* <Drawer.Screen name="Profile" options={{navigation }}>
+        <Drawer.Screen name="Profile" options={{navigation }}>
           {(props) => <Profile {...props} extraData={handleLogOut} />}
-        </Drawer.Screen> */}
+        </Drawer.Screen>
 
-        <Stack.Screen
+        {/* <Stack.Screen
           name="Profile"
           component={() => {
             return <Profile handleLogOut={handleLogOut} />;
           }}
-        />
+        /> */}
 
 
       </Drawer.Navigator>
@@ -117,9 +117,10 @@ const RootNavigator = () => {
       component={() => {
         return <MyDrawer handleSignIn={handleLogOut} />;
       }}
-    />
+      />
 
       ) : (
+
       // User is NOT signed in
       // <Stack.Screen  name="Onboarding">
       //   {(props) => <Onboarding {...props} extraData={handleSignIn} />
@@ -130,7 +131,7 @@ const RootNavigator = () => {
       component={() => {
         return <Onboarding handleSignIn={handleSignIn} />;
       }}
-    />
+      />
 
       // <Stack.Screen name="Profile" component={MyDrawer} options={{ headerShown: false }} />
       )}
