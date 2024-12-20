@@ -34,11 +34,7 @@ const Onboarding = ({handleSignIn}) => {
 
     const saveUser = () => {
 
-      console.log('name: ' + name)
-      console.log('firstName: ' + firstName)
-      console.log('lastName: ' + lastName)
-
-      multiSetData(['isSignedIn', 'true'],['firstName', firstName],['lastName', lastName],['email', email], ['phone', ''],['orderStates', 'true'],['passwordChanges', 'true'],['specialOrders', 'true'], ['newsletters', 'true'], ['image', '']);
+      multiSetData(['isSignedIn', 'true'],['firstName', name],['lastName', ''],['email', email], ['phone', ''],['orderStates', 'true'],['passwordChanges', 'true'],['specialOrders', 'true'], ['newsletters', 'true'], ['image', '']);
 
 
       Alert.alert(`Nice to meet you, ${name}`);
@@ -59,7 +55,7 @@ const Onboarding = ({handleSignIn}) => {
                         style={styles.input}
                         value={name}
                         onChangeText={setName}
-                        placeholder={'John Doe'}
+                        placeholder={'John'}
                         keyboardType={'phone-pad'}
                         clearButtonMode={'true'}
                         

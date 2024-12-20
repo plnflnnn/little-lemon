@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Checkbox } from 'react-native-paper';
 import {deleteData, getData, multiGetData, multiSetData, setData} from '../utils/asyncstorage';
 import Header from "../components/Header";
-//import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 function Profile ({handleLogOut}) {
 
@@ -261,8 +261,20 @@ function Profile ({handleLogOut}) {
     handleLogOut()
   }
 
+  async function saveImg () {
+    if(image !== '' && typeof(image) !== undefined && typeof(image) !== null) {
+      await AsyncStorage.setItem('image', image).then(() => console.log('image saved'));
+      setState((state) => {
+        return {
+          ...state,
+          image: image,
+        }
+      });
+    }
+  }
+
   function saveChanges() {
-    multiSetData(['firstName', firstName],['lastName', lastName],['email', email], ['orderStates', orderStates],['passwordChanges', passwordChanges],['specialOrders', specialOrders], ['newsletters', newsletters], ['image', image], ['phone', phone]);
+    multiSetData(['firstName', firstName],['lastName', lastName],['email', email], ['orderStates', orderStates],['passwordChanges', passwordChanges],['specialOrders', specialOrders], ['newsletters', newsletters], ['phone', phone]);
   }
 
   const pickImage = async () => {
@@ -445,7 +457,10 @@ function Profile ({handleLogOut}) {
                 >
                   <Text style={styles.btnTxt}>Discard changes</Text>
                 </Pressable>
-                <Pressable style={styles.btn} onPress={() => updateData()} >
+                <Pressable style={styles.btn} onPress={() => {
+                  saveImg();
+                  updateData();
+                } } >
                   <Text style={styles.btnTxt}>Save changes</Text>
                 </Pressable>
               </View>
