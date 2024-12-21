@@ -1,6 +1,6 @@
 import { View, TouchableOpacity, Text, StyleSheet , ScrollView} from 'react-native';
 
-const Filters = ({ onChange, selections, sections }) => {
+const Filters = ({ onChange, selections, sections, handleFilter }) => {
   return (
     <ScrollView horizontal  showsHorizontalScrollIndicator={false} style={styles.filtersContainer}>
       {sections.map((section, index) => (
@@ -8,6 +8,7 @@ const Filters = ({ onChange, selections, sections }) => {
           key={index}
           onPress={() => {
             onChange(index);
+            //handleFilter();
           }}
           style={{
             width: '35%',

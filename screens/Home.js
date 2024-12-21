@@ -22,14 +22,14 @@ import Filters from '../components/Filters';
 import Header from "../components/Header";
 import Hero from "../components/Hero"
 import { getSectionListData, useUpdateEffect } from '../utils/index';
-import { dropDatabase } from '../database';
+// import { dropDatabase } from '../database';
 
 import { useSQLiteContext } from 'expo-sqlite';
 
 const API_URL =
   'https://raw.githubusercontent.com/Meta-Mobile-Developer-PC/Working-With-Data-API/main/capstone.json';
 
-const sections = ['Starters', 'Mains', 'Deserts'];
+const sections = ['Starters', 'Mains', 'Desserts'];
 
 const Item = ({ name, description, price, image }) => (
   <View style={styles.item}>
@@ -59,7 +59,6 @@ export default function Home() {
       }
       const json = await response.json();
       const menu = json.menu;
-      setData(menu);
       return menu;
     } catch (error) {
       console.error(error.message);
@@ -78,9 +77,9 @@ export default function Home() {
     }
   }
 
-  async function saveMenuItems() {
+  async function saveMenuItems(menuItems) {
     try{
-      let data = await db.runAsync(`insert into menuitems ( name, price, category, description, image ) values ${menuItems.map((item) => `('${item.name}', '${item.price}', '${item.category}', '${item.description}', '${item.image}')`).join(', ')}`)
+      const data = await db.execSync(`insert into menuitems ( name, price, category, description, image ) values ${menuItems.map((item) => `("${item.name}", "${item.price}", "${item.category}", "${item.description}", "${item.image}")`).join(', ')}`);
       return data;
     }catch(e){
         console.log(`saveMenuItems: An error occured ${e}`)
@@ -89,31 +88,39 @@ export default function Home() {
 
   async function filterByQueryAndCategories(query, activeCategories) {
     //const categories = activeCategories.map(() => '?').join(', '); 
-
-    const categories = activeCategories.join(', ').toLowerCase(); 
+    //const categories = activeCategories.join(', ').toLowerCase(); 
 
     const name = query ? `AND name LIKE '%${query}%'` : ''; 
-    console.log(`SELECT * FROM menuitems WHERE category IN (${categories}) ${name}`)
+
+    //console.log(`select * from menuitems where ${
+      //activeCategories.map((category) => `category='${category.toLowerCase()}'`).join(' or ')} ${name}`)
+
     try{
-      const data = await db.getAllSync(
-        `SELECT * FROM menuitems WHERE category IN (${categories}) ${name}`
+      const data = await db.getAllAsync(
+        `select * from menuitems where ${
+      activeCategories.map((category) => `category='${category.toLowerCase()}'`).join(' or ')} ${name}`
       )
-      
+
+      console.log('filtered data: ' + JSON.stringify(data))
+
       return data;
     }catch(e){
         console.log(`filter: An error occured ${e}`)
     }
+
   }
 
   useEffect(() => {
     (async () => {
       try {
         let menuItems = await getMenuItems();
+        console.log(menuItems)
         if (!menuItems.length) {
           const fetchedMenu = await fetchData();
           saveMenuItems(fetchedMenu);
-          console.log(fetchedMenu);
           setData(fetchedMenu);
+        } else {
+          setData(menuItems);
         }
       } catch (e) {
         Alert.alert(e.message);
@@ -122,28 +129,30 @@ export default function Home() {
     })();
   }, []);
 
-  useUpdateEffect(() => {
-    (async () => {
-      const activeCategories = sections.filter((s, i) => {
-        if (filterSelections.every((item) => item === false)) {
-          return true;
-        }
-        return filterSelections[i];
-      });
-      console.log(query)
-      console.log(activeCategories)
-      try {
-        const menuItems = await filterByQueryAndCategories(
-          query,
-          activeCategories
-        );
-        setData(menuItems);
-      } catch (e) {
-        Alert.alert(e.message);
-        console.log(e.message)
+  useEffect(() => {
+    handleFilter();
+  }, [filterSelections, query])
+
+  async function handleFilter() {
+    const activeCategories = sections.filter((s, i) => {
+      if (filterSelections.every((item) => item === false)) {
+        return true;
       }
-    })();
-  }, [filterSelections, query]);
+      return filterSelections[i];
+    });
+    console.log(query)
+    console.log(activeCategories)
+    try {
+      const menuItems = await filterByQueryAndCategories(
+        query,
+        activeCategories
+      );
+      setData(menuItems);
+    } catch (e) {
+      Alert.alert(e.message);
+      console.log(e.message)
+    }  
+  }
 
   const lookup = useCallback((q) => {
     setQuery(q);
@@ -161,16 +170,6 @@ export default function Home() {
     arrayCopy[index] = !filterSelections[index];
     setFilterSelections(arrayCopy);
   };
-
-
-  // const handleFiltersChange = async (key) => {
-  //   setFilterSelections(state => {
-  //     return {
-  //       ...state,
-  //       [key]: !state[key]
-  //     }
-  //   });
-  // };
 
   return (
     <ScrollView style={styles.container}>
@@ -199,7 +198,7 @@ export default function Home() {
         data={data}
         keyExtractor={(item, index) => String(index)}
         renderItem={({ item }) => (
-          <Item title={item.name} description={item.description} price={item.price} image={`https://github.com/Meta-Mobile-Developer-PC/Working-With-Data-API/blob/main/images/${item.image}?raw=true`} />
+          <Item name={item.name} description={item.description} price={item.price} image={`https://github.com/Meta-Mobile-Developer-PC/Working-With-Data-API/blob/main/images/${item.image}?raw=true`} />
         )}
       />
 
