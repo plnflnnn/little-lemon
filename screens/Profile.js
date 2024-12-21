@@ -55,101 +55,81 @@ function Profile ({handleLogOut}) {
 
       switch(key) {
         case 'firstName':
-          //if(changedState(firstName, value)) {
             setState((state) => {
               return {
                 ...state,
                 firstName: firstName,
               }
             });
-          //}
           break;
           case 'lastName': 
-            //if(changedState(lastName, value)) {
               setState((state) => {
                 return {
                   ...state,
                   lastName: lastName,
                 }
               });
-            //}
             break;
             case 'email': 
-            //if(changedState(email, value)) {
               setState((state) => {
                 return {
                   ...state,
                   email: email,
                 }
               });
-            //}
             break;  
             case 'phone': 
-            //if(changedState(phone, value)) {
               setState((state) => {
                 return {
                   ...state,
                   phone: phone,
                 }
               });
-            //}
             break;  
             case 'image': 
-            //if(changedState(image, value)) {
               setState((state) => {
                 return {
                   ...state,
                   image: image,
                 }
               });
-            //}
             break;  
             case 'orderStates': 
-            //if(changedState(orderStates, value)) {
               setState((state) => {
                 return {
                   ...state,
                   orderStates: orderStates,
                 }
               });
-            //}
             break; 
             case 'passwordChanges': 
-            //if(changedState(passwordChanges, value)) {
               setState((state) => {
                 return {
                   ...state,
                   passwordChanges: passwordChanges,
                 }
               });
-            //}
             break; 
             case 'specialOrders': 
-            //if(changedState(specialOrders, value)) {
               setState((state) => {
                 return {
                   ...state,
                   specialOrders: specialOrders,
                 }
               });
-            //}
             break;   
             case 'newsletters': 
-            //if(changedState(newsletters, value)) {
               setState((state) => {
                 return {
                   ...state,
                   newsletters: newsletters,
                 }
               });
-            //}
             break;                      
       }
-      
       console.log(`${key}: ${value}`);
       //Alert.alert(`Changes saved.`);
       saveChanges();
-      //
     }
   };
 
@@ -219,7 +199,7 @@ function Profile ({handleLogOut}) {
   }
 
   async function saveImg () {
-    if(image !== '' && typeof(image) !== undefined && typeof(image) !== null) {
+    if(typeof(image) !== undefined && typeof(image) !== null) {
       await AsyncStorage.setItem('image', image).then(() => console.log('image saved'));
       setState((state) => {
         return {
@@ -242,7 +222,7 @@ function Profile ({handleLogOut}) {
       quality: 1,
     });
 
-    console.log(result);
+    //console.log(result);
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);

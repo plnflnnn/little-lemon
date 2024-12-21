@@ -16,15 +16,27 @@ const Header = ({imageUpdate, route, discardChanges}) => {
     setImage(asyncImage);
   }
 
+  const checkImage = async () => {
+    const asyncImage = await AsyncStorage.getItem('image');
+    if(asyncImage !== image) {
+      setImage(asyncImage);
+    } else {
+      return
+    }
+    console.log('header')
+  }
+
   useEffect(() => {
     getImage();
   }, []);
 
   useEffect(() => {
-    setImage(imageUpdate);
-  }, [imageUpdate]);
+    checkImage();
+  });
 
-  //console.log(image)
+  useEffect(() => {
+    getImage();
+  }, [imageUpdate]);
 
     return (
       <View style={styles.header}>
@@ -43,12 +55,14 @@ const Header = ({imageUpdate, route, discardChanges}) => {
         </Pressable>
         ): ''}
 
+        <Pressable style={styles.logo} onPress={()=>{navigation.navigate("Home")}} > 
         <Image 
             source={require('../assets/images/logo.png')}
             accessible={true}
             accessibilityLabel={'Little Lemon Logo'}
-            style={styles.logo}
+            style={styles.logoImg}
         />
+        </Pressable> 
 
         {route == 'Onboarding' ? '' : (
           <Pressable onPress={()=>{navigation.navigate("Profile")}} > 
@@ -59,10 +73,6 @@ const Header = ({imageUpdate, route, discardChanges}) => {
             )}
           </Pressable> 
         )}
-
-
-
-
       </View>
     )
 };
@@ -84,6 +94,9 @@ const styles = StyleSheet.create({
       resizeMode: "cover",
       alignSelf: 'center',
       margin: 'auto',
+    },
+    logoImg: {
+      width: '100%'
     },
     backBtn: {
       alignItems: 'center',

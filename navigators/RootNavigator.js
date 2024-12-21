@@ -109,7 +109,7 @@ const RootNavigator = () => {
 
 
   return (
-    <Stack.Navigator >
+    <Stack.Navigator options={{ headerShown: false }} >
       {state.isSignedIn ? (
       // Onboarding completed, user is signed in
 
@@ -128,8 +128,9 @@ const RootNavigator = () => {
 
       <Stack.Screen
       name="Profile"
+      options={{ headerShown: false }}
       component={() => {
-        return <MyDrawer options={{ headerShown: false }} handleLogOut={handleLogOut} />;
+        return <MyDrawer handleLogOut={handleLogOut} />;
       }}
       />
 
