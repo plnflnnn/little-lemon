@@ -34,7 +34,7 @@ const sections = ['Starters', 'Mains', 'Desserts'];
 const Item = ({ name, description, price, image }) => (
   <View style={styles.item}>
     <Text style={styles.itemName}>{name}</Text>
-    <Text style={styles.itemDescription}>{description}</Text>
+    <Text numberOfLines={2} style={styles.itemDescription}>{description}</Text>
     <Text style={styles.itemPrice}>${price}</Text>
     <Image style={styles.itemImage} src={image}/>
   </View>
@@ -87,32 +87,33 @@ export default function Home() {
   }
 
   async function filterByQueryAndCategories(query, activeCategories) {
-    //const categories = activeCategories.map(() => '?').join(', '); 
-    //const categories = activeCategories.join(', ').toLowerCase(); 
-
     const name = query ? `AND name LIKE '%${query}%'` : ''; 
-
-    //console.log(`select * from menuitems where ${
-      //activeCategories.map((category) => `category='${category.toLowerCase()}'`).join(' or ')} ${name}`)
-
     try{
-      const data = await db.getAllAsync(
+      const items = await db.getAllAsync(
         `select * from menuitems where ${
       activeCategories.map((category) => `category='${category.toLowerCase()}'`).join(' or ')} ${name}`
-      )
-
-      console.log('filtered data: ' + JSON.stringify(data))
-
-      return data;
+      );
+      return items;
     }catch(e){
         console.log(`filter: An error occured ${e}`)
     }
+  }
 
+  async function createDb() {
+    const menu = await fetchData();
+    try {
+    await db.execAsync(`
+        create table if not exists menuitems (id integer primary key not null, name text, price decimal(10,2), category text, description text, image text);
+        insert into menuitems ( name, price, category, description, image ) values ${menu.map((item) => `('${item.name}', '${item.price}', '${item.category}', '${item.description}', '${item.image}')`).join(', ')}`);
+    } catch(e){
+      console.log(`createTable: An error occured ${e}`)
+    }
   }
 
   useEffect(() => {
     (async () => {
       try {
+        await createDb();
         let menuItems = await getMenuItems();
         console.log(menuItems)
         if (!menuItems.length) {
@@ -143,7 +144,7 @@ export default function Home() {
     console.log(query)
     console.log(activeCategories)
     try {
-      const menuItems = await filterByQueryAndCategories(
+      let menuItems = await filterByQueryAndCategories(
         query,
         activeCategories
       );
@@ -236,21 +237,17 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingLeft: 20,
     height: 130,
+    marginBottom: 20,
   },
   itemName: {
     fontSize: 16,
     fontWeight: 400,
     color: '#000',
-    //backgroundColor: '#000000',
-    justifyContent: 'center',
-    alignItems: 'center',
-
   },
   itemDescription: {
     width: '60%',
     fontSize: 14,
     fontWeight: 300,
-    paddingBottom: 5,
   },
   itemPrice: {
     fontWeight: 400,

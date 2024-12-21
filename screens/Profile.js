@@ -158,23 +158,6 @@ function Profile ({handleLogOut}) {
   }, []);
 
   async function setLocalState() {
-
-    // const values = await multiGetData('firstName', 'lastName', 'email', 'phone', 'orderStates', 'passwordChanges', 'specialOrders', 'newsletters', 'image');
-
-    // const values = await AsyncStorage.multiGet(['firstName', 'lastName', 'email', 'phone', 'orderStates', 'passwordChanges', 'specialOrders', 'newsletters', 'image'])
-    //         .then(data => console.log(data))
-    //         .catch((e) => console.log(e.message));
-
-    // const initialState = values.reduce((acc, curr) => {
-    //   acc[curr[0]] = JSON.parse(curr[1]);
-    //   return acc;
-    // }, {});
-
-    //console.log('initialState: ' + initialState.firstName)
-
-    // console.log(values)
-    // console.log('values: ' + values.firstName)
-
     const fnameV = await getData('firstName');
     const lnameV = await getData('lastName');
     const emailV = await getData('email');
@@ -208,31 +191,6 @@ function Profile ({handleLogOut}) {
         newsletters: newslettersV,
       }
     });
-
-    // setFirstName(values.firstName);
-    // setLastName(values.lastName);
-    // setEmail(values.email);
-    // setPhone(values.phone);
-    // setImage(values.image);
-    // setOrderStates(values.orderStates);
-    // setPasswordChanges(values.passwordChanges);
-    // setSpecialOrders(values.specialOrders);
-    // setNewsletters(values.newsletters);
-
-    // setState((state) => {
-    //   return {
-    //     ...state,
-    //     firstName: values.firstName,
-    //     lastName: values.lastName,
-    //     email: values.email,
-    //     phone: values.phone,
-    //     image: values.image,
-    //     orderStates: values.orderStates,
-    //     passwordChanges: values.passwordChanges,
-    //     specialOrders: values.specialOrders,
-    //     newsletters: values.newsletters,
-    //   }
-    // });
   }
 
   function discardChanges() {
@@ -258,7 +216,6 @@ function Profile ({handleLogOut}) {
     setSpecialOrders('false');
     setNewsletters('false');
     deleteData();
-    handleLogOut()
   }
 
   async function saveImg () {
@@ -467,6 +424,7 @@ function Profile ({handleLogOut}) {
 
               <Pressable style={styles.logOutBtn}  onPress={() => {
                 logOut();
+                handleLogOut();
                 //navigation.navigate('Onboarding');
               }}>
                 <Text style={styles.logOutBtnTxt}>Log Out</Text>

@@ -23,13 +23,21 @@ const RootNavigator = () => {
   async function checkUser() {
     const isLoggedIn = await getData('isSignedIn');
     if(isLoggedIn == 'true') {
-      setState(state => {
-        return {...state,isLoading: false, isSignedIn: true}
-      });
+      if(state.isLoggedIn == 'true' ) {
+        return 
+      } else {
+        setState(state => {
+          return {...state,isLoading: false, isSignedIn: true}
+        });
+      }
     } else {
-      setState(state => {
-        return {...state,isLoading: false, isSignedIn: false}
-      });
+      if(state.isLoggedIn == 'false' ) {
+        return 
+      } else {
+        setState(state => {
+          return {...state,isLoading: false, isSignedIn: false}
+        });
+      }
     }
   }
 
@@ -84,17 +92,16 @@ const RootNavigator = () => {
         <Drawer.Screen name="Home" options={{navigation}} component={Home} />
         {/* <Drawer.Screen name="Profile" options={{navigation }} component={Profile} /> */}
 
-        <Drawer.Screen name="Profile" options={{navigation }}>
+        {/* <Drawer.Screen name="Profile" options={{navigation }}>
           {(props) => <Profile {...props} extraData={handleLogOut} />}
-        </Drawer.Screen>
+        </Drawer.Screen> */}
 
-        {/* <Stack.Screen
+        <Stack.Screen
           name="Profile"
           component={() => {
             return <Profile handleLogOut={handleLogOut} />;
           }}
-        /> */}
-
+        />
 
       </Drawer.Navigator>
     );
@@ -111,11 +118,18 @@ const RootNavigator = () => {
       // </Stack.Screen>
       
 
+      // <Stack.Screen
+      // name="Profile"
+      // options={{ headerShown: false }} 
+      // component={() => {
+      //   return <MyDrawer extraData={handleLogOut} />;
+      // }}
+      // />
+
       <Stack.Screen
       name="Profile"
-      options={{ headerShown: false }} 
       component={() => {
-        return <MyDrawer handleSignIn={handleLogOut} />;
+        return <MyDrawer options={{ headerShown: false }} handleLogOut={handleLogOut} />;
       }}
       />
 
