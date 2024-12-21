@@ -55,7 +55,13 @@ const Header = ({imageUpdate, route, discardChanges}) => {
         </Pressable>
         ): ''}
 
-        <Pressable style={styles.logo} onPress={()=>{navigation.navigate("Home")}} > 
+        <Pressable style={styles.logo} onPress={()=>{
+          if(route !== 'Onboarding') {
+            navigation.navigate("Home")
+          } else {
+            return
+          }
+          }} > 
         <Image 
             source={require('../assets/images/logo.png')}
             accessible={true}
