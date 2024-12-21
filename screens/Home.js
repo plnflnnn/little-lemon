@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight:600,
     color: 'black',
-    paddingLeft: 20,
+    paddingLeft: 20
   },
   item: {
     justifyContent: 'space-between',
@@ -236,8 +236,8 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     paddingLeft: 20,
-    height: 130,
-    marginBottom: 20,
+    height: 90,
+    marginBottom: 30,
   },
   itemName: {
     fontSize: 16,

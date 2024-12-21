@@ -36,8 +36,7 @@ const Filters = ({ onChange, selections, sections }) => {
 const styles = StyleSheet.create({
   filtersContainer: {
     flexDirection: 'row',
-    marginBottom: 16,
-
+    marginBottom: 20,
   },
 });
 
