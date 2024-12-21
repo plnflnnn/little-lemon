@@ -12,17 +12,19 @@ import {
 } from 'react-native';
 import { Searchbar } from 'react-native-paper';
 import debounce from 'lodash.debounce';
-import {
-  createTable,
-  getMenuItems,
-  saveMenuItems,
-  filterByQueryAndCategories,
-} from '../database';
+// import {
+//   createTable,
+//   getMenuItems,
+//   saveMenuItems,
+//   filterByQueryAndCategories,
+// } from '../database';
 import Filters from '../components/Filters';
 import Header from "../components/Header";
 import Hero from "../components/Hero"
 import { getSectionListData, useUpdateEffect } from '../utils/index';
 import { dropDatabase } from '../database';
+
+import { useSQLiteContext } from 'expo-sqlite';
 
 const API_URL =
   'https://raw.githubusercontent.com/Meta-Mobile-Developer-PC/Working-With-Data-API/main/capstone.json';
@@ -46,11 +48,12 @@ export default function Home() {
     sections.map(() => false)
   );
 
+  const db = useSQLiteContext();
+
   const fetchData = async() => {
     try {
       const response = await fetch(API_URL);
-      console.log('response: ' + response)
-
+      console.log('response: ' + response);
       if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
       }
@@ -64,10 +67,47 @@ export default function Home() {
     }
   }
 
+  async function getMenuItems() {
+    try{
+      const menuItems = await db.getAllSync(
+          'select * from menuitems'
+      )
+      return menuItems;
+    }catch(e){
+        console.log(`getMenuItems: An error occured ${e}`)
+    }
+  }
+
+  async function saveMenuItems() {
+    try{
+      let data = await db.runAsync(`insert into menuitems ( name, price, category, description, image ) values ${menuItems.map((item) => `('${item.name}', '${item.price}', '${item.category}', '${item.description}', '${item.image}')`).join(', ')}`)
+      return data;
+    }catch(e){
+        console.log(`saveMenuItems: An error occured ${e}`)
+    }
+  }
+
+  async function filterByQueryAndCategories(query, activeCategories) {
+    //const categories = activeCategories.map(() => '?').join(', '); 
+
+    const categories = activeCategories.join(', ').toLowerCase(); 
+
+    const name = query ? `AND name LIKE '%${query}%'` : ''; 
+    console.log(`SELECT * FROM menuitems WHERE category IN (${categories}) ${name}`)
+    try{
+      const data = await db.getAllSync(
+        `SELECT * FROM menuitems WHERE category IN (${categories}) ${name}`
+      )
+      
+      return data;
+    }catch(e){
+        console.log(`filter: An error occured ${e}`)
+    }
+  }
+
   useEffect(() => {
     (async () => {
       try {
-        await createTable();
         let menuItems = await getMenuItems();
         if (!menuItems.length) {
           const fetchedMenu = await fetchData();
@@ -76,7 +116,6 @@ export default function Home() {
           setData(fetchedMenu);
         }
       } catch (e) {
-        // Handle error
         Alert.alert(e.message);
         console.log(e.message)
       }
@@ -122,6 +161,16 @@ export default function Home() {
     arrayCopy[index] = !filterSelections[index];
     setFilterSelections(arrayCopy);
   };
+
+
+  // const handleFiltersChange = async (key) => {
+  //   setFilterSelections(state => {
+  //     return {
+  //       ...state,
+  //       [key]: !state[key]
+  //     }
+  //   });
+  // };
 
   return (
     <ScrollView style={styles.container}>
