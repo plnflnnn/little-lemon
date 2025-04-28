@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, Image } from 'react-native';
 const Splash = () => {
   return (
         <View style={styles.container}>
-            <Image 
+            <Image
                 source={require('../assets/images/little-lemon-logo.png')}
                 accessible={true}
                 accessibilityLabel={'Little Lemon Logo'}

@@ -24,7 +24,7 @@ const RootNavigator = () => {
     const isLoggedIn = await getData('isSignedIn');
     if(isLoggedIn == 'true') {
       if(state.isLoggedIn == 'true' ) {
-        return 
+        return
       } else {
         setState(state => {
           return {...state,isLoading: false, isSignedIn: true}
@@ -32,7 +32,7 @@ const RootNavigator = () => {
       }
     } else {
       if(state.isLoggedIn == 'false' ) {
-        return 
+        return
       } else {
         setState(state => {
           return {...state,isLoading: false, isSignedIn: false}
@@ -90,12 +90,6 @@ const RootNavigator = () => {
     return (
       <Drawer.Navigator screenOptions={styles}>
         <Drawer.Screen name="Home" options={{navigation}} component={Home} />
-        {/* <Drawer.Screen name="Profile" options={{navigation }} component={Profile} /> */}
-
-        {/* <Drawer.Screen name="Profile" options={{navigation }}>
-          {(props) => <Profile {...props} extraData={handleLogOut} />}
-        </Drawer.Screen> */}
-
         <Stack.Screen
           name="Profile"
           component={() => {
@@ -112,20 +106,6 @@ const RootNavigator = () => {
     <Stack.Navigator options={{ headerShown: false }} >
       {state.isSignedIn ? (
       // Onboarding completed, user is signed in
-
-      // <Stack.Screen options={{ headerShown: false }} name="Profile">
-      //   {(props) => <MyDrawer {...props} extraData={handleLogOut} />}
-      // </Stack.Screen>
-      
-
-      // <Stack.Screen
-      // name="Profile"
-      // options={{ headerShown: false }} 
-      // component={() => {
-      //   return <MyDrawer extraData={handleLogOut} />;
-      // }}
-      // />
-
       <Stack.Screen
       name="Profile"
       options={{ headerShown: false }}
@@ -135,20 +115,13 @@ const RootNavigator = () => {
       />
 
       ) : (
-
       // User is NOT signed in
-      // <Stack.Screen  name="Onboarding">
-      //   {(props) => <Onboarding {...props} extraData={handleSignIn} />
-      // }</Stack.Screen>
-
       <Stack.Screen
       name="Onboarding"
       component={() => {
         return <Onboarding handleSignIn={handleSignIn} />;
       }}
       />
-
-      // <Stack.Screen name="Profile" component={MyDrawer} options={{ headerShown: false }} />
       )}
     </Stack.Navigator>
   );

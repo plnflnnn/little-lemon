@@ -1,422 +1,167 @@
-import { View, Text, StyleSheet, Image,  Pressable , Alert, ScrollView } from "react-native";
-import {useState, useEffect,useRef} from "react";
-import { TextInput } from "react-native-gesture-handler";
+import { View, Text, StyleSheet, Image, Pressable, Alert, ScrollView, TextInput } from "react-native";
+import { useState, useEffect, useContext } from "react";
 import { MaskedTextInput } from "react-native-mask-text";
 import * as ImagePicker from 'expo-image-picker';
 import { Checkbox } from 'react-native-paper';
-import {deleteData, getData, multiGetData, multiSetData, setData} from '../utils/asyncstorage';
 import Header from "../components/Header";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { UserContext } from "../contexts/UserContext";
 
-function Profile ({handleLogOut}) {
+function Profile({ handleLogOut }) {
+  const { user, saveUser, loadUser, logout } = useContext(UserContext);
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [orderStates, setOrderStates] = useState('true');
-  const [passwordChanges, setPasswordChanges] = useState('true');
-  const [specialOrders, setSpecialOrders] = useState('true');
-  const [newsletters, setNewsletters] = useState('true');
-  const [image, setImage] = useState('');
-
-  const phoneRef = useRef('');
-
-  const [state, setState] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    orderStates: '',
-    passwordChanges: '',
-    specialOrders: '',
-    newsletters: '',
-    image: '',
-  });
-
-  // function changedState(state, objectValue) {
-  //   if(state != objectValue) {
-  //     return true;
-  //   } else {
-  //     return false;
-  //   }
-  // };
-
-  function updateData() {
-
-    //setPhone(phoneRef)
-
-    if(phone == null || email  == null || firstName  == null || lastName == null) {
-      Alert.alert(`Please fill the form to save changes.`);
-      return
-    }
-
-    for (const [key, value] of Object.entries(state)) {
-
-      switch(key) {
-        case 'firstName':
-            setState((state) => {
-              return {
-                ...state,
-                firstName: firstName,
-              }
-            });
-          break;
-          case 'lastName': 
-              setState((state) => {
-                return {
-                  ...state,
-                  lastName: lastName,
-                }
-              });
-            break;
-            case 'email': 
-              setState((state) => {
-                return {
-                  ...state,
-                  email: email,
-                }
-              });
-            break;  
-            case 'phone': 
-              setState((state) => {
-                return {
-                  ...state,
-                  phone: phone,
-                }
-              });
-            break;  
-            case 'image': 
-              setState((state) => {
-                return {
-                  ...state,
-                  image: image,
-                }
-              });
-            break;  
-            case 'orderStates': 
-              setState((state) => {
-                return {
-                  ...state,
-                  orderStates: orderStates,
-                }
-              });
-            break; 
-            case 'passwordChanges': 
-              setState((state) => {
-                return {
-                  ...state,
-                  passwordChanges: passwordChanges,
-                }
-              });
-            break; 
-            case 'specialOrders': 
-              setState((state) => {
-                return {
-                  ...state,
-                  specialOrders: specialOrders,
-                }
-              });
-            break;   
-            case 'newsletters': 
-              setState((state) => {
-                return {
-                  ...state,
-                  newsletters: newsletters,
-                }
-              });
-            break;                      
-      }
-      console.log(`${key}: ${value}`);
-      //Alert.alert(`Changes saved.`);
-      saveChanges();
-    }
-  };
+  const [editedUser, setEditedUser] = useState(user);
 
   useEffect(() => {
-    setLocalState();
+    loadUser();
   }, []);
 
-  async function setLocalState() {
-    const fnameV = await getData('firstName');
-    const lnameV = await getData('lastName');
-    const emailV = await getData('email');
-    const phoneV = await getData('phone');
-    const orderStatesV = await getData('orderStates');
-    const passwordChangesV = await getData('passwordChanges');
-    const specialOrdersV = await getData('specialOrders');
-    const newslettersV = await getData('newsletters');
-    const imageV = await getData('image');
+  useEffect(() => {
+    setEditedUser(user);
+  }, [user]);
 
-    setFirstName(fnameV);
-    setLastName(lnameV);
-    setEmail(emailV);
-    setPhone(phoneV);
-    setOrderStates(orderStatesV);
-    setPasswordChanges(passwordChangesV);
-    setSpecialOrders(specialOrdersV);
-    setNewsletters(newslettersV);
-    setImage(imageV);
-
-    setState((state) => {
-      return {
-        ...state,
-        firstName: fnameV,
-        lastName: lnameV,
-        email: emailV,
-        phone: phoneV,
-        orderStates: orderStatesV,
-        passwordChanges: passwordChangesV,
-        specialOrders: specialOrdersV,
-        newsletters: newslettersV,
-      }
-    });
-  }
-
-  function discardChanges() {
-    setFirstName(state.firstName);
-    setLastName(state.lastName);
-    setEmail(state.email);
-    setPhone(state.phone);
-    setImage(state.image);
-    setOrderStates(state.orderStates);
-    setPasswordChanges(state.passwordChanges);
-    setSpecialOrders(state.specialOrders);
-    setNewsletters(state.newsletters);
-  }
-
-  function logOut() {
-    setFirstName('');
-    setLastName('');
-    setEmail('');
-    setPhone('');
-    setImage(null);
-    setOrderStates('false');
-    setPasswordChanges('false');
-    setSpecialOrders('false');
-    setNewsletters('false');
-    deleteData();
-  }
-
-  async function saveImg () {
-    if(typeof(image) !== undefined && typeof(image) !== null) {
-      await AsyncStorage.setItem('image', image).then(() => console.log('image saved'));
-      setState((state) => {
-        return {
-          ...state,
-          image: image,
-        }
-      });
+  const saveChanges = async () => {
+    if (!editedUser.firstName || !editedUser.lastName || !editedUser.email || !editedUser.phone) {
+      Alert.alert("Please fill the form to save changes.");
+      return;
     }
-  }
 
-  function saveChanges() {
-    multiSetData(['firstName', firstName],['lastName', lastName],['email', email], ['orderStates', orderStates],['passwordChanges', passwordChanges],['specialOrders', specialOrders], ['newsletters', newsletters], ['phone', phone]);
-  }
+    await saveUser(editedUser);
+    Alert.alert("Changes saved.");
+  };
+
+  const discardChanges = () => {
+    setEditedUser(user);
+  };
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
+    const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images', 'videos'],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
     });
 
-    //console.log(result);
-
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setEditedUser(prev => ({ ...prev, image: result.assets[0].uri }));
     }
   };
 
-  // function customMask (text) {
-  //   let newText = '';
-  //   let mask = '+1 111 111 1111';
-  
-  //   for (let i = 0, j = 0; i < text.length; i++) {
-  //     if (mask[j] === '9') {
-  //       if (/\d/.test(text[i])) {
-  //         newText += text[i];
-  //         j++;
-  //       }
-  //     } else {
-  //       newText += mask[j];
-  //       j++;
-  //     }
-  //   }
-  
-  //   setPhone(newText);
-  // };
+  const removeImage = () => {
+    setEditedUser(prev => ({ ...prev, image: '' }));
+  };
 
-    return (
-        <ScrollView style={styles.mainContainer}>
-            <Header imageUpdate={image} avatarImage={true} discardChanges={discardChanges} route={'Profile'} />
-            <View style={styles.container}>
-              <Text style={styles.title}>Personal Information</Text>
-              <Text style={styles.label}>Avatar</Text>
+  const logOut = async () => {
+    await logout();
+    handleLogOut();
+  };
 
-              <View style={styles.avatarSection}>
-                {image ?  (
-                  <Image style={styles.avatar}
-                  accessible={true}
-                  accessibilityLabel={'avatar'}
-                  source={{ uri: image }} /> 
-                ) : (
-                  <Image style={styles.avatar}
-                  accessible={true}
-                  accessibilityLabel={'avatar'}
-                  source={require('../assets/images/avatar.png')} /> 
-                )
-                }
+  return (
+    <ScrollView style={styles.mainContainer}>
+      <Header imageUpdate={editedUser.image} avatarImage={true} discardChanges={discardChanges} screen={'Profile'} />
+      <View style={styles.container}>
+        <Text style={styles.title}>Personal Information</Text>
+        <Text style={styles.label}>Avatar</Text>
 
-                <Pressable style={styles.avatarBtn} onPress={pickImage}>
-                  <Text style={styles.avatarBtnTxt}>Change</Text>
-                </Pressable> 
-                
-                <Pressable style={styles.avatarBtn} onPress={() => setImage('')}>
-                  <Text style={styles.avatarBtnTxt}>Remove</Text> 
-                </Pressable>
-                
-              </View>
+        <View style={styles.avatarSection}>
+          {editedUser.image ? (
+            <Image style={styles.avatar} source={{ uri: editedUser.image }} />
+          ) : (
+            <Image style={styles.avatar} source={require('../assets/images/avatar.png')} />
+          )}
 
-              <Text style={styles.label}>First name</Text>
-              <TextInput  
-                  value={firstName}
-                  onChangeText={setFirstName}
-                  placeholder={'Tilly'}
-                  placeholderTextColor='#ccc'
-                  style={styles.input} 
-                  keyboardType={'default'}
-                  textContentType="givenName"
-                  autoComplete='true' />
+          <Pressable style={styles.avatarBtn} onPress={pickImage}>
+            <Text style={styles.avatarBtnTxt}>Change</Text>
+          </Pressable>
 
-              <Text style={styles.label}>Last name</Text>
-              <TextInput 
-                  value={lastName}
-                  onChangeText={setLastName}
-                  placeholder={'Doe'}
-                  placeholderTextColor='#ccc'
-                  style={styles.input}
-                  keyboardType={'default'}
-                  textContentType="familyName"
-                  autoComplete='true' />
+          <Pressable style={styles.avatarBtn} onPress={removeImage}>
+            <Text style={styles.avatarBtnTxt}>Remove</Text>
+          </Pressable>
+        </View>
 
-              <Text style={styles.label}>Email</Text>
-              <TextInput 
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder={'example@gmail.com'}
-                  placeholderTextColor='#ccc'
-                  keyboardType={'email-address'}
-                  textContentType="emailAddress"
-                  style={styles.input}
-                  autoComplete='true' />
+        <Text style={styles.label}>First name</Text>
+        <TextInput
+          value={editedUser.firstName}
+          onChangeText={text => setEditedUser(prev => ({ ...prev, firstName: text }))}
+          placeholder="Tilly"
+          placeholderTextColor="#ccc"
+          style={styles.input}
+          textContentType="givenName"
+          autoComplete="name"
+        />
 
-              <Text style={styles.label}>Phone number</Text>
-              <MaskedTextInput
-                  type="string"
-                  placeholder="+1 111 111 1111"
-                  mask="+1 999 999 9999"
-                  value={phone}
-                  onChangeText={setPhone}
-                  style={styles.input}
-                  keyboardType="numeric"
-              /> 
+        <Text style={styles.label}>Last name</Text>
+        <TextInput
+          value={editedUser.lastName}
+          onChangeText={text => setEditedUser(prev => ({ ...prev, lastName: text }))}
+          placeholder="Doe"
+          placeholderTextColor="#ccc"
+          style={styles.input}
+          textContentType="familyName"
+          autoComplete="name-family"
+        />
 
-              <Text style={styles.labelNotifications}>Email notifications</Text>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          value={editedUser.email}
+          onChangeText={text => setEditedUser(prev => ({ ...prev, email: text }))}
+          placeholder="example@gmail.com"
+          placeholderTextColor="#ccc"
+          style={styles.input}
+          keyboardType="email-address"
+          textContentType="emailAddress"
+          autoComplete="email"
+        />
 
-              <View style={styles.checkboxWrapper}>
-                <Checkbox
-                  color={'#495E57'}
-                  uncheckedColor={'#495E57'}
-                  status={orderStates == 'true' ? 'checked' : 'unchecked'}
-                  onPress={() => {
-                    if(orderStates == 'true') {
-                      setOrderStates('false');
-                    } else {
-                      setOrderStates('true');
-                    }
-                  }}
-                />
-                <Text style={styles.checkboxLabel}>Order states</Text>
-              </View>
+        <Text style={styles.label}>Phone number</Text>
+        <MaskedTextInput
+          type="custom"
+          mask="+1 999 999 9999"
+          value={editedUser.phone}
+          onChangeText={text => setEditedUser(prev => ({ ...prev, phone: text }))}
+          style={styles.input}
+          keyboardType="numeric"
+        />
 
-              <View style={styles.checkboxWrapper}>
-                <Checkbox
-                  color={'#495E57'}
-                  uncheckedColor={'#495E57'}
-                  status={passwordChanges == 'true' ? 'checked' : 'unchecked'}
-                  onPress={() => {
-                    if(passwordChanges == 'true') {
-                      setPasswordChanges('false');
-                    } else {
-                      setPasswordChanges('true');
-                    }
-                  }}
-                />
-                <Text style={styles.checkboxLabel}>Password changes</Text>
-              </View>
+        <Text style={styles.labelNotifications}>Email notifications</Text>
 
-              <View style={styles.checkboxWrapper}>
-                <Checkbox
-                  color={'#495E57'}
-                  uncheckedColor={'#495E57'}
-                  status={specialOrders == 'true' ? 'checked' : 'unchecked'}
-                  onPress={() => {
-                    if(specialOrders == 'true') {
-                      setSpecialOrders('false');
-                    } else {
-                      setSpecialOrders('true');
-                    }
-                  }}
-                />      
-                <Text style={styles.checkboxLabel}>Special orders</Text> 
-              </View>
+        {[
+          { label: "Order states", key: "orderStates" },
+          { label: "Password changes", key: "passwordChanges" },
+          { label: "Special orders", key: "specialOrders" },
+          { label: "Newsletters", key: "newsletters" },
+        ].map((item, index) => (
+          <View key={index} style={styles.checkboxWrapper}>
+            <Checkbox
+              color="#495E57"
+              uncheckedColor="#495E57"
+              status={editedUser[item.key] === 'true' ? 'checked' : 'unchecked'}
+              onPress={() =>
+                setEditedUser(prev => ({
+                  ...prev,
+                  [item.key]: prev[item.key] === 'true' ? 'false' : 'true',
+                }))
+              }
+            />
+            <Text style={styles.checkboxLabel}>{item.label}</Text>
+          </View>
+        ))}
 
-              <View style={styles.checkboxWrapper}>
-                <Checkbox
-                  color={'#495E57'}
-                  uncheckedColor={'#495E57'}
-                  status={newsletters == 'true' ? 'checked' : 'unchecked'}
-                  onPress={() => {
-                    if(newsletters == 'true') {
-                      setNewsletters('false');
-                    } else {
-                      setNewsletters('true');
-                    }
-                  }}
-                />
-                <Text style={styles.checkboxLabel}>Newsletters</Text>
-              </View>      
+        <View style={styles.btnWrapper}>
+          <Pressable style={styles.btn} onPress={discardChanges}>
+            <Text style={styles.btnTxt}>Discard changes</Text>
+          </Pressable>
+          <Pressable style={styles.btn} onPress={saveChanges}>
+            <Text style={styles.btnTxt}>Save changes</Text>
+          </Pressable>
+        </View>
 
-              <View style={styles.btnWrapper}>
-                <Pressable style={styles.btn} onPress={() => discardChanges()} 
-                >
-                  <Text style={styles.btnTxt}>Discard changes</Text>
-                </Pressable>
-                <Pressable style={styles.btn} onPress={() => {
-                  saveImg();
-                  updateData();
-                } } >
-                  <Text style={styles.btnTxt}>Save changes</Text>
-                </Pressable>
-              </View>
-
-              <Pressable style={styles.logOutBtn}  onPress={() => {
-                logOut();
-                handleLogOut();
-                //navigation.navigate('Onboarding');
-              }}>
-                <Text style={styles.logOutBtnTxt}>Log Out</Text>
-               </Pressable>
-
-            </View>
-
-        </ScrollView>
-
-    );
+        <Pressable style={styles.logOutBtn} onPress={logOut}>
+          <Text style={styles.logOutBtnTxt}>Log Out</Text>
+        </Pressable>
+      </View>
+    </ScrollView>
+  );
 }
-
 
 const styles = StyleSheet.create({
     mainContainer: {

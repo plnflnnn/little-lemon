@@ -4,7 +4,6 @@ import { validateEmail } from '../utils';
 import Button from "../components/Button";
 
 const SubscribeScreen = () => {
-  // Add subscribe screen code here
   const [email, setEmail] = React.useState('');
   const isEmailValid = validateEmail(email);
 
