@@ -1,7 +1,6 @@
-import * as React from "react";
-import {useState, useEffect} from 'react';
+import React, { useState, useEffect } from "react";
+import { Alert } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { useNavigation } from "@react-navigation/native";
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { getData, setData } from "../utils/asyncstorage";
 import Onboarding from "../screens/Onboarding";
@@ -13,119 +12,87 @@ const Drawer = createDrawerNavigator();
 const Stack = createNativeStackNavigator();
 
 const RootNavigator = () => {
-  const navigation = useNavigation();
   const [state, setState] = useState({
     isSignedIn: false,
-    isLoading: false,
-    isError: false,
+    isLoading: true,
   });
 
   async function checkUser() {
-    const isLoggedIn = await getData('isSignedIn');
-    if(isLoggedIn == 'true') {
-      if(state.isLoggedIn == 'true' ) {
-        return
-      } else {
-        setState(state => {
-          return {...state,isLoading: false, isSignedIn: true}
-        });
-      }
-    } else {
-      if(state.isLoggedIn == 'false' ) {
-        return
-      } else {
-        setState(state => {
-          return {...state,isLoading: false, isSignedIn: false}
-        });
-      }
+    try {
+      const isLoggedIn = await getData('isSignedIn');
+      setState({
+        isLoading: false,
+        isSignedIn: isLoggedIn === 'true',
+      });
+    } catch (e) {
+      setState({
+        isLoading: false,
+        isSignedIn: false,
+      });
+      Alert.alert(`An error occurred: ${e.message}`);
     }
-  }
-
-  function handleSignIn() {
-    setData('isSignedIn', 'true');
-    setState(state => {
-      return {...state,isLoading: false, isSignedIn: true}
-    });
-  }
-
-  function handleLogOut() {
-    setData('isSignedIn', 'false');
-    setState(state => {
-      return {...state,isLoading: false, isSignedIn: false}
-    });
   }
 
   useEffect(() => {
     (async () => {
-      // await AsyncStorage.clear();
       try {
-        setState(state => {
-          return {...state,isLoading: true}
-        });
-        checkUser();
+        setState(state => ({ ...state, isLoading: true }));
+        await checkUser();  // await this here
       } catch (e) {
-        setState(state => {
-          return {...state,isLoading: false, isSignedIn: false,}
-        });
+        setState(state => ({ ...state, isLoading: false, isSignedIn: false }));
         Alert.alert(`An error occurred: ${e.message}`);
       }
     })();
   }, []);
+  
+  function handleSignIn() {
+    setData('isSignedIn', 'true');
+    setState(state => ({ ...state, isSignedIn: true }));
+  }
+
+  function handleLogOut() {
+    setData('isSignedIn', 'false');
+    setState(state => ({ ...state, isSignedIn: false }));
+  }
 
   if (state.isLoading) {
-    // We haven't finished reading from AsyncStorage yet
     return <Splash />;
   }
 
   function MyDrawer() {
-
-    const styles = {
-      drawerActiveTintColor: '#495E57',
-      drawerActiveBackgroundColor: '#ccc',
-      drawerLabelStyle: {
-        color: 'black',
-      },
-    }
-
     return (
-      <Drawer.Navigator screenOptions={styles}>
-        <Drawer.Screen name="Home" options={{navigation}} component={Home} />
-        <Stack.Screen
-          name="Profile"
-          component={() => {
-            return <Profile handleLogOut={handleLogOut} />;
-          }}
+      <Drawer.Navigator
+        screenOptions={{
+          drawerActiveTintColor: '#495E57',
+          drawerActiveBackgroundColor: '#ccc',
+          drawerLabelStyle: { color: 'black' },
+        }}
+      >
+        <Drawer.Screen
+          name="Home"
+          component={Home}
+          options={{ headerShown: false }}
         />
-
+        <Drawer.Screen name="Profile" options={{ headerShown: false }}>
+          {() => <Profile handleLogOut={handleLogOut} />}
+        </Drawer.Screen>
       </Drawer.Navigator>
     );
   }
 
-
   return (
-    <Stack.Navigator options={{ headerShown: false }} >
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       {state.isSignedIn ? (
-      // Onboarding completed, user is signed in
-      <Stack.Screen
-      name="Profile"
-      options={{ headerShown: false }}
-      component={() => {
-        return <MyDrawer handleLogOut={handleLogOut} />;
-      }}
-      />
-
+        <Stack.Screen name="Profile">
+          {() => <MyDrawer />}
+        </Stack.Screen>
       ) : (
-      // User is NOT signed in
-      <Stack.Screen
-      name="Onboarding"
-      component={() => {
-        return <Onboarding handleSignIn={handleSignIn} />;
-      }}
-      />
+        <Stack.Screen name="Onboarding">
+          {props => <Onboarding {...props} handleSignIn={handleSignIn} />}
+        </Stack.Screen>
       )}
     </Stack.Navigator>
   );
 };
 
 export default RootNavigator;
-

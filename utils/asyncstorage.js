@@ -1,65 +1,71 @@
-
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Get a single item by key
 export const getData = async (key) => {
+  try {
+    const jsonValue = await AsyncStorage.getItem(key);
+    // If stored data is JSON string, parse it, otherwise return raw string
     try {
-        const data = await AsyncStorage.getItem(key).catch((e) => console.log(e.message));
-        return data;
-      } catch(e) {
-        console.log(e.message)
+      return jsonValue != null ? JSON.parse(jsonValue) : null;
+    } catch {
+      return jsonValue;
     }
-}
+  } catch (e) {
+    console.error(`Error reading key "${key}":`, e);
+    throw e;
+  }
+};
 
-export const multiGetData = async (...keys) => {
-    try {
-        const data = await AsyncStorage.multiGet(keysArray)
-            .then(data => console.log(data))
-            .catch((e) => console.log(e.message));
-        return data;
-      } catch(e) {
-        console.log(e.message)
-    }
-}
-
-
+// Set a single item by key
 export const setData = async (key, value) => {
-    try {
-        await AsyncStorage.setItem(key, value)
-            .then(() => console.log(`${key} with ${value} value has been saved in AsyncStorage.`))
-            .catch((e) => console.log(e.message));
-      } catch(e) {
-        console.log(e.message)
-    }
-}
+  try {
+    // Store values as JSON string for consistency
+    const jsonValue = JSON.stringify(value);
+    await AsyncStorage.setItem(key, jsonValue);
+  } catch (e) {
+    console.error(`Error saving key "${key}":`, e);
+    throw e;
+  }
+};
 
-export const multiSetData = async (...arrays) => {
-    const arraysArray = [...arrays];
+// Remove a single item by key
+export const deleteData = async (keys) => {
     try {
-        const data = await AsyncStorage.multiSet(arraysArray)
-            .then(data => console.log(data))
-            .catch((e) => console.log(e.message));
-        return data;
-      } catch(e) {
-        console.log(e.message)
+      await AsyncStorage.multiRemove(keys);
+    } catch (e) {
+      console.error('Error removing multiple keys:', e);
+      throw e;
     }
-}
+  };
 
-export const updateData = async (key, value) => {
-    try {
-        await AsyncStorage.mergeItem(key, value)
-            .then(() => console.log(`${key} value has been changed to ${value}.`))
-            .catch((e) => console.log(e.message));
-      } catch(e) {
-        console.log(e.message)
-    }
-}
+// Set multiple key-value pairs at once
+// Accepts array of [key, value], values can be objects or primitives
+export const multiSetData = async (keyValuePairs) => {
+  try {
+    // Convert all values to JSON strings
+    const pairs = keyValuePairs.map(([key, value]) => [key, JSON.stringify(value)]);
+    await AsyncStorage.multiSet(pairs);
+  } catch (e) {
+    console.error('Error saving multiple key-value pairs:', e);
+    throw e;
+  }
+};
 
-export const deleteData = async () => {
-    try {
-        await AsyncStorage.clear()
-            .then(() => console.log('AsyncStorage has been cleared.'))
-            .catch((e) => console.log(e.message));
-      } catch(e) {
-        console.log(e.message)
-    }
-}
+// Get multiple keys at once, returns object { key: value }
+export const multiGetData = async (keys) => {
+  try {
+    const result = await AsyncStorage.multiGet(keys);
+    const data = {};
+    result.forEach(([key, value]) => {
+      try {
+        data[key] = value != null ? JSON.parse(value) : null;
+      } catch {
+        data[key] = value;
+      }
+    });
+    return data;
+  } catch (e) {
+    console.error('Error reading multiple keys:', e);
+    throw e;
+  }
+};

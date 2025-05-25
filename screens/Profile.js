@@ -5,6 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Checkbox } from 'react-native-paper';
 import Header from "../components/Header";
 import { UserContext } from "../contexts/UserContext";
+import Constants from "expo-constants";
 
 function Profile({ handleLogOut }) {
   const { user, saveUser, loadUser, logout } = useContext(UserContext);
@@ -167,6 +168,7 @@ const styles = StyleSheet.create({
     mainContainer: {
       flex: 1,
       backgroundColor: "#ffffff",
+      paddingTop: Constants.statusBarHeight,
     },
     container: {
       borderWidth: 1,

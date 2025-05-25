@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TextInput, Pressable, Alert } from 'react-nativ
 import { validateEmail } from '../utils';
 import Header from '../components/Header';
 import { multiSetData } from '../utils/asyncstorage';
+import Constants from "expo-constants";
 
 const Onboarding = ({ handleSignIn }) => {
   const [name, setName] = useState('');
@@ -48,7 +49,7 @@ const Onboarding = ({ handleSignIn }) => {
       <Header avatarImage={false} screen={'Onboarding'} />
       <View style={styles.container}>
         <View style={styles.form}>
-          <Text style={styles.title}>Let us get to know you</Text>
+          <Text style={styles.title}>Are you hungry?</Text>
           <Text style={styles.label}>First Name</Text>
           <TextInput
             style={styles.input}
@@ -73,8 +74,8 @@ const Onboarding = ({ handleSignIn }) => {
         <Pressable
           style={[styles.button, !isValid && { opacity: 0.5 }]}
           disabled={!isValid}
-          onPress={() => {
-            saveUser();
+          onPress={async () => {
+            await saveUser();
             handleSignIn();
           }}
         >
@@ -88,10 +89,10 @@ const Onboarding = ({ handleSignIn }) => {
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: "#EDEFEE",
+    backgroundColor: "#ffffff",
+    paddingTop: Constants.statusBarHeight,
   },
   container: {
-    backgroundColor: "#EDEFEE",
     flexDirection: 'column',
     justifyContent: 'space-between',
     padding: 20,

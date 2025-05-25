@@ -5,10 +5,14 @@ const Hero = () => {
   return (
     <>
         <View style={styles.hero}>
+
+          <View style={styles.left}>
             <Text style={styles.title}>Little Lemon</Text>
             <Text style={styles.subtitle}>Chicago</Text>
             <Text style={styles.text} multiline>We are a family owned Mediterranean restaurant, focused on traditional recipes served with a modern twist.</Text>
-            <Image style={styles.image} 
+          </View>
+
+            <Image style={styles.image}
             source={require('../assets/images/hero.jpg')}
             accessible={true}
             accessibilityLabel={'Little Lemon Hero Image'}
@@ -25,21 +29,24 @@ const styles = StyleSheet.create({
     backgroundColor: '#495E57',
     padding: 10,
     paddingHorizontal: 10,
-    paddingBottom: 30,
+    paddingBottom: 45,
     justifyContent: 'space-between',
     flexDirection: 'column',
     flexWrap: 'wrap',
     position: 'relative',
   },
+  left: {
+    width: '50%',
+  },
   title: {
     color: "#F4CE14",
-    fontSize: 38,
+    fontSize: 36,
     src: require('../assets/fonts/MarkaziText-Regular.ttf'),
     fontFamily: 'MarkaziText-Regular',
   },
   subtitle: {
     fontFamily: 'Markazi Text',
-    fontSize: 30,
+    fontSize: 24,
     color: '#FFFFFF',
   },
   text: {
@@ -47,10 +54,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     flexWrap: 'wrap',
     fontFamily: 'Karla',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 400,
     color: '#FFFFFF',
-    width: '50%',
+    width: '100%',
     marginTop: 30,
   },
   image: {

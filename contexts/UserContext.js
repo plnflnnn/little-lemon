@@ -37,9 +37,25 @@ export const UserProvider = ({ children }) => {
     });
   };
 
+  // const saveUser = async (newUserData) => {
+  //   setUser(newUserData);
+  //   await multiSetData(
+  //     ['firstName', newUserData.firstName],
+  //     ['lastName', newUserData.lastName],
+  //     ['email', newUserData.email],
+  //     ['phone', newUserData.phone],
+  //     ['orderStates', newUserData.orderStates],
+  //     ['passwordChanges', newUserData.passwordChanges],
+  //     ['specialOrders', newUserData.specialOrders],
+  //     ['newsletters', newUserData.newsletters],
+  //     ['image', newUserData.image]
+  //   );
+  // };
+
+
   const saveUser = async (newUserData) => {
     setUser(newUserData);
-    await multiSetData(
+    await multiSetData([
       ['firstName', newUserData.firstName],
       ['lastName', newUserData.lastName],
       ['email', newUserData.email],
@@ -49,11 +65,24 @@ export const UserProvider = ({ children }) => {
       ['specialOrders', newUserData.specialOrders],
       ['newsletters', newUserData.newsletters],
       ['image', newUserData.image]
-    );
+    ]);
   };
 
+  
   const logout = async () => {
-    await deleteData();
+    const keysToRemove = [
+      'isSignedIn',
+      'firstName',
+      'lastName',
+      'email',
+      'phone',
+      'orderStates',
+      'passwordChanges',
+      'specialOrders',
+      'newsletters',
+      'image'
+    ];
+    await deleteData(keysToRemove);
     setUser({
       firstName: '',
       lastName: '',
@@ -66,6 +95,7 @@ export const UserProvider = ({ children }) => {
       image: '',
     });
   };
+  
 
   return (
     <UserContext.Provider value={{ user, setUser, saveUser,loadUser, logout }}>

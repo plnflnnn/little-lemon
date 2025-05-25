@@ -15,6 +15,7 @@ import Filters from '../components/Filters';
 import Header from "../components/Header";
 import Hero from "../components/Hero";
 import { useSQLiteContext } from 'expo-sqlite';
+import Constants from "expo-constants";
 
 const API_URL = 'https://raw.githubusercontent.com/Meta-Mobile-Developer-PC/Working-With-Data-API/main/capstone.json';
 
@@ -77,7 +78,7 @@ export default function Home() {
     try {
       let whereClause = '';
 
-      if (activeCategories.length && !activeCategories.includes('All')) {
+      if (activeCategories.length) {
         const categoryConditions = activeCategories
           .map(cat => `category = '${cat.toLowerCase()}'`)
           .join(' OR ');
@@ -218,6 +219,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#ffffff',
+    paddingTop: Constants.statusBarHeight,
   },
   searchBar: {
     marginTop: -30,
