@@ -37,22 +37,6 @@ export const UserProvider = ({ children }) => {
     });
   };
 
-  // const saveUser = async (newUserData) => {
-  //   setUser(newUserData);
-  //   await multiSetData(
-  //     ['firstName', newUserData.firstName],
-  //     ['lastName', newUserData.lastName],
-  //     ['email', newUserData.email],
-  //     ['phone', newUserData.phone],
-  //     ['orderStates', newUserData.orderStates],
-  //     ['passwordChanges', newUserData.passwordChanges],
-  //     ['specialOrders', newUserData.specialOrders],
-  //     ['newsletters', newUserData.newsletters],
-  //     ['image', newUserData.image]
-  //   );
-  // };
-
-
   const saveUser = async (newUserData) => {
     setUser(newUserData);
     await multiSetData([

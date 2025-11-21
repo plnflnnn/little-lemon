@@ -37,7 +37,7 @@ const RootNavigator = () => {
     (async () => {
       try {
         setState(state => ({ ...state, isLoading: true }));
-        await checkUser();  // await this here
+        await checkUser();
       } catch (e) {
         setState(state => ({ ...state, isLoading: false, isSignedIn: false }));
         Alert.alert(`An error occurred: ${e.message}`);
