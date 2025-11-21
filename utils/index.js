@@ -5,7 +5,7 @@ export const validateEmail = (email) => {
     /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   );
 };
- 
+
 export const SECTION_LIST_MOCK_DATA = [
     {
       title: 'Appetizers',
@@ -39,26 +39,13 @@ export const SECTION_LIST_MOCK_DATA = [
     },
   ];
 
-/**
- * 3. Implement this function to transform the raw data
- * retrieved by the getMenuItems() function inside the database.js file
- * into the data structure a SectionList component expects as its "sections" prop.
- * @see https://reactnative.dev/docs/sectionlist as a reference
- */
 export function getSectionListData(data) {
-  // SECTION_LIST_MOCK_DATA is an example of the data structure you need to return from this function.
-  // The title of each section should be the category.
-  // The data property should contain an array of menu items. 
-  // Each item has the following properties: "id", "title" and "price"
-  
   const titlesSet = new Set();
   data.forEach(item => {
     titlesSet.add(item.category);
   });
 
   const titles = Array.from(titlesSet);
-  //console.log('categories/titles:' + titles);
-
   let newDataArray = [];
 
   const newDataObject = () => titles.forEach(title => {
@@ -72,7 +59,6 @@ export function getSectionListData(data) {
 
     data.forEach(item => {
       if(titles.filter(title => title == item.category)) {
-        
         const newItemObj = {
           id: item.id,
           title: item.title,
@@ -86,9 +72,6 @@ export function getSectionListData(data) {
         });
       };
     });
-
-  //return SECTION_LIST_MOCK_DATA;
-  //console.log(newDataArray)
   return newDataArray;
 }
 

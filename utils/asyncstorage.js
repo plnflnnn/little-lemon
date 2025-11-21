@@ -1,10 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Get a single item by key
 export const getData = async (key) => {
   try {
     const jsonValue = await AsyncStorage.getItem(key);
-    // If stored data is JSON string, parse it, otherwise return raw string
     try {
       return jsonValue != null ? JSON.parse(jsonValue) : null;
     } catch {
@@ -16,10 +14,8 @@ export const getData = async (key) => {
   }
 };
 
-// Set a single item by key
 export const setData = async (key, value) => {
   try {
-    // Store values as JSON string for consistency
     const jsonValue = JSON.stringify(value);
     await AsyncStorage.setItem(key, jsonValue);
   } catch (e) {
@@ -28,7 +24,6 @@ export const setData = async (key, value) => {
   }
 };
 
-// Remove a single item by key
 export const deleteData = async (keys) => {
     try {
       await AsyncStorage.multiRemove(keys);
@@ -38,11 +33,9 @@ export const deleteData = async (keys) => {
     }
   };
 
-// Set multiple key-value pairs at once
-// Accepts array of [key, value], values can be objects or primitives
+
 export const multiSetData = async (keyValuePairs) => {
   try {
-    // Convert all values to JSON strings
     const pairs = keyValuePairs.map(([key, value]) => [key, JSON.stringify(value)]);
     await AsyncStorage.multiSet(pairs);
   } catch (e) {
@@ -51,7 +44,7 @@ export const multiSetData = async (keyValuePairs) => {
   }
 };
 
-// Get multiple keys at once, returns object { key: value }
+
 export const multiGetData = async (keys) => {
   try {
     const result = await AsyncStorage.multiGet(keys);
