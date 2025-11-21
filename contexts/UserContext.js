@@ -52,7 +52,6 @@ export const UserProvider = ({ children }) => {
     ]);
   };
 
-  
   const logout = async () => {
     const keysToRemove = [
       'isSignedIn',
