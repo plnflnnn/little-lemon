@@ -1,76 +1,65 @@
 import { View, Image, Text, StyleSheet } from 'react-native';
+import { colors } from '../theme/colors';
+import { fonts } from '../theme/typography';
 
 const Hero = () => {
   return (
-    <>
-        <View style={styles.hero}>
-
-          <View style={styles.left}>
-            <Text style={styles.title}>Little Lemon</Text>
-            <Text style={styles.subtitle}>Chicago</Text>
-            <Text style={styles.text} multiline>We are a family owned Mediterranean restaurant, focused on traditional recipes served with a modern twist.</Text>
-          </View>
-
-            <Image style={styles.image}
-            source={require('../assets/images/hero.jpg')}
-            accessible={true}
-            accessibilityLabel={'Little Lemon Hero Image'}
-            />
-        </View>
-    </>
+    <View style={styles.hero}>
+      <View style={styles.left}>
+        <Text style={styles.title}>Little Lemon</Text>
+        <Text style={styles.subtitle}>Chicago</Text>
+        <Text style={styles.text}>
+          We are a family owned Mediterranean restaurant, focused on traditional
+          recipes served with a modern twist.
+        </Text>
+      </View>
+      <Image
+        style={styles.image}
+        source={require('../assets/images/hero.jpg')}
+        accessible
+        accessibilityLabel="Little Lemon restaurant"
+      />
+    </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   hero: {
     width: '100%',
-    backgroundColor: '#495E57',
-    padding: 10,
-    paddingHorizontal: 10,
-    paddingBottom: 45,
+    backgroundColor: colors.primary,
+    padding: 16,
+    paddingBottom: 40,
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    flexDirection: 'column',
-    flexWrap: 'wrap',
-    position: 'relative',
+    alignItems: 'center',
   },
   left: {
-    width: '50%',
+    flex: 1,
+    paddingRight: 12,
   },
   title: {
-    color: "#F4CE14",
+    color: colors.yellow,
     fontSize: 36,
-    src: require('../assets/fonts/MarkaziText-Regular.ttf'),
-    fontFamily: 'MarkaziText-Regular',
+    fontFamily: fonts.markazi,
   },
   subtitle: {
-    fontFamily: 'Markazi Text',
+    fontFamily: fonts.markazi,
     fontSize: 24,
-    color: '#FFFFFF',
+    color: colors.white,
   },
   text: {
-    display: 'flex',
-    flexDirection: 'column',
-    flexWrap: 'wrap',
-    fontFamily: 'Karla',
+    fontFamily: fonts.karla,
     fontSize: 16,
-    fontWeight: 400,
-    color: '#FFFFFF',
-    width: '100%',
-    marginTop: 30,
+    fontWeight: '400',
+    color: colors.white,
+    marginTop: 16,
   },
   image: {
-    width: '40%',
-    height: '70%',
-    resizeMode: "cover",
-    marginLeft: 20,
-    marginRight: 20,
-    borderRadius: 20,
-    position: 'absolute',
-    top: '30%',
-    right: '2%'
+    width: 140,
+    height: 140,
+    resizeMode: 'cover',
+    borderRadius: 16,
   },
 });
-
 
 export default Hero;

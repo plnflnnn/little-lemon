@@ -1,230 +1,180 @@
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Text,
   View,
   StyleSheet,
   FlatList,
-  SafeAreaView,
-  Alert,
   Image,
-  ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { Searchbar } from 'react-native-paper';
-import debounce from 'lodash.debounce';
-import Filters from '../components/Filters';
-import Header from "../components/Header";
-import Hero from "../components/Hero";
+import Constants from 'expo-constants';
 import { useSQLiteContext } from 'expo-sqlite';
-import Constants from "expo-constants";
-
-const API_URL = 'https://raw.githubusercontent.com/Meta-Mobile-Developer-PC/Working-With-Data-API/main/capstone.json';
-
-const sections = ['Starters', 'Mains', 'Desserts'];
+import Filters from '../components/Filters';
+import Header from '../components/Header';
+import Hero from '../components/Hero';
+import {
+  MENU_CATEGORIES,
+  filterMenuItems,
+  getMenuImageUrl,
+  seedMenuIfEmpty,
+} from '../database/menu';
+import { colors } from '../theme/colors';
 
 const Item = ({ name, description, price, image }) => (
   <View style={styles.item}>
-    <Text style={styles.itemName}>{name}</Text>
-    <Text numberOfLines={2} style={styles.itemDescription}>{description}</Text>
-    <Text style={styles.itemPrice}>${price}</Text>
-    <Image
-      style={styles.itemImage}
-      source={{ uri: image }}
-    />
+    <View style={styles.itemCopy}>
+      <Text style={styles.itemName}>{name}</Text>
+      <Text numberOfLines={2} style={styles.itemDescription}>
+        {description}
+      </Text>
+      <Text style={styles.itemPrice}>${price}</Text>
+    </View>
+    <Image style={styles.itemImage} source={{ uri: image }} />
   </View>
 );
+
+function getActiveCategories(selections) {
+  const noneSelected = selections.every((selected) => !selected);
+  if (noneSelected) {
+    return [];
+  }
+  return MENU_CATEGORIES.filter((_, index) => selections[index]);
+}
 
 export default function Home() {
   const [data, setData] = useState([]);
   const [searchBarText, setSearchBarText] = useState('');
   const [query, setQuery] = useState('');
-  const [filterSelections, setFilterSelections] = useState(sections.map(() => false));
+  const [filterSelections, setFilterSelections] = useState(
+    MENU_CATEGORIES.map(() => false)
+  );
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState(null);
   const db = useSQLiteContext();
 
-  const fetchData = async () => {
-    try {
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error(`Response status: ${response.status}`);
-      const json = await response.json();
-      return json.menu;
-    } catch (error) {
-      console.error('fetchData error:', error.message);
-      throw error;
-    }
-  };
-
-  const getMenuItems = async () => {
-    try {
-      return await db.getAllAsync('SELECT * FROM menuitems');
-    } catch (e) {
-      console.error('getMenuItems error:', e.message);
-      return [];
-    }
-  };
-
-  const saveMenuItems = async (menuItems) => {
-    try {
-      await db.execAsync(`
-        INSERT INTO menuitems (name, price, category, description, image)
-        VALUES ${menuItems.map(item =>
-          `('${item.name.replace("'", "''")}', '${item.price}', '${item.category}', '${item.description.replace("'", "''")}', '${item.image}')`
-        ).join(', ')};
-      `);
-    } catch (e) {
-      console.error('saveMenuItems error:', e.message);
-    }
-  };
-
-  const filterByQueryAndCategories = async (query, activeCategories) => {
-    try {
-      let whereClause = '';
-
-      if (activeCategories.length) {
-        const categoryConditions = activeCategories
-          .map(cat => `category = '${cat.toLowerCase()}'`)
-          .join(' OR ');
-        whereClause += `(${categoryConditions})`;
-      }
-
-      if (query) {
-        if (whereClause) whereClause += ' AND ';
-        whereClause += `name LIKE '%${query}%'`;
-      }
-
-      const sql = whereClause ? `SELECT * FROM menuitems WHERE ${whereClause}` : `SELECT * FROM menuitems`;
-      return await db.getAllAsync(sql);
-    } catch (e) {
-      console.error('filter error:', e.message);
-      return [];
-    }
-  };
-
-  const createDb = async () => {
-    try {
-      await db.execAsync(`
-        CREATE TABLE IF NOT EXISTS menuitems (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT,
-          price DECIMAL(10,2),
-          category TEXT,
-          description TEXT,
-          image TEXT
-        );
-      `);
-
-      const existingItems = await getMenuItems();
-      if (!existingItems.length) {
-        const menu = await fetchData();
-        await saveMenuItems(menu);
-      }
-    } catch (e) {
-      console.error('createDb error:', e.message);
-    }
-  };
+  const loadMenu = useCallback(async () => {
+    await seedMenuIfEmpty(db);
+    return filterMenuItems(db, query, getActiveCategories(filterSelections));
+  }, [db, filterSelections, query]);
 
   useEffect(() => {
-    (async () => {
-      try {
-        await createDb();
-        const menuItems = await getMenuItems();
-        setData(menuItems);
-      } catch (e) {
-        Alert.alert('Error', e.message);
-      }
-    })();
-  }, []);
+    loadMenu()
+      .then((items) => {
+        setError(null);
+        setData(items);
+      })
+      .catch((e) => {
+        setError(e.message);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [loadMenu]);
 
-  const handleFilter = useCallback(async () => {
-    const activeCategories = sections.filter((s, i) => {
-      if (filterSelections.every(sel => !sel)) return true;
-      return filterSelections[i];
-    });
-
+  const onRefresh = async () => {
+    setRefreshing(true);
     try {
-      const items = await filterByQueryAndCategories(query, activeCategories);
+      const items = await loadMenu();
+      setError(null);
       setData(items);
     } catch (e) {
-      console.error('handleFilter error:', e.message);
+      setError(e.message);
+    } finally {
+      setRefreshing(false);
     }
-  }, [filterSelections, query]);
-
-  useEffect(() => {
-    handleFilter();
-  }, [filterSelections, query, handleFilter]);
-
-  const lookup = useCallback((q) => {
-    setQuery(q);
-  }, []);
-
-  const debouncedLookup = useMemo(() => debounce(lookup, 500), [lookup]);
-
-  useEffect(() => {
-    return () => {
-      debouncedLookup.cancel();
-    };
-  }, [debouncedLookup]);
-
-  const handleSearchChange = (text) => {
-    setSearchBarText(text);
-    debouncedLookup(text);
   };
 
-  const handleFiltersChange = (index) => {
-    setFilterSelections(prev => {
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setQuery(searchBarText);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchBarText]);
+
+  const handleFiltersChange = useCallback((index) => {
+    setFilterSelections((prev) => {
       const updated = [...prev];
       updated[index] = !prev[index];
       return updated;
     });
-  };
+  }, []);
+
+  const listHeader = useMemo(
+    () => (
+      <>
+        <Header screen="Home" />
+        <Hero />
+        <Searchbar
+          placeholder="Search"
+          placeholderTextColor={colors.muted}
+          onChangeText={setSearchBarText}
+          value={searchBarText}
+          style={styles.searchBar}
+          iconColor={colors.yellow}
+          inputStyle={{ color: colors.white }}
+          elevation={0}
+        />
+        <Text style={styles.title}>ORDER FOR DELIVERY!</Text>
+        <Filters
+          selections={filterSelections}
+          onChange={handleFiltersChange}
+          sections={MENU_CATEGORIES}
+        />
+      </>
+    ),
+    [filterSelections, handleFiltersChange, searchBarText]
+  );
+
+  const emptyMessage = error
+    ? 'The menu could not be loaded. Pull to refresh or try again later.'
+    : loading
+      ? 'Loading menu...'
+      : 'No dishes match your search.';
 
   return (
-    <ScrollView style={styles.container}>
-      <Header avatarImage screen="Home"/>
-      <Hero />
-      <Searchbar
-        placeholder="Search"
-        placeholderTextColor="grey"
-        onChangeText={handleSearchChange}
-        value={searchBarText}
-        style={styles.searchBar}
-        iconColor="#F4CE14"
-        inputStyle={{ color: 'white' }}
-        elevation={0}
-      />
-      <Text style={styles.title}>ORDER FOR DELIVERY!</Text>
-      <Filters
-        selections={filterSelections}
-        onChange={handleFiltersChange}
-        sections={sections}
-      />
-      <SafeAreaView>
-        <FlatList
-          scrollEnabled={false}
-          data={data}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => (
-            <Item
-              name={item.name}
-              description={item.description}
-              price={item.price}
-              image={`https://github.com/Meta-Mobile-Developer-PC/Working-With-Data-API/blob/main/images/${item.image}?raw=true`}
-            />
-          )}
+    <FlatList
+      style={styles.container}
+      contentContainerStyle={styles.listContent}
+      data={data}
+      keyExtractor={(item) => String(item.id)}
+      ListHeaderComponent={listHeader}
+      ListEmptyComponent={
+        <View style={styles.emptyState}>
+          {loading ? <ActivityIndicator color={colors.primary} /> : null}
+          <Text style={styles.emptyText}>{emptyMessage}</Text>
+        </View>
+      }
+      renderItem={({ item }) => (
+        <Item
+          name={item.name}
+          description={item.description}
+          price={item.price}
+          image={getMenuImageUrl(item.image)}
         />
-      </SafeAreaView>
-    </ScrollView>
+      )}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+    />
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.white,
+  },
+  listContent: {
     paddingTop: Constants.statusBarHeight,
+    paddingBottom: 24,
+    flexGrow: 1,
   },
   searchBar: {
-    marginTop: -30,
+    marginTop: -24,
     marginBottom: 20,
-    backgroundColor: '#495E57',
+    backgroundColor: colors.primary,
     shadowRadius: 0,
     shadowOpacity: 0,
     width: '100%',
@@ -232,38 +182,50 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '600',
-    color: 'black',
+    color: colors.black,
     paddingLeft: 20,
   },
   item: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
-    flexDirection: 'column',
-    flexWrap: 'wrap',
+    alignItems: 'center',
     width: '100%',
-    paddingLeft: 20,
-    height: 90,
-    marginBottom: 30,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  itemCopy: {
+    flex: 1,
+    paddingRight: 12,
   },
   itemName: {
     fontSize: 16,
-    fontWeight: '400',
-    color: '#000',
+    fontWeight: '600',
+    color: colors.black,
+    marginBottom: 4,
   },
   itemDescription: {
-    width: '60%',
     fontSize: 14,
     fontWeight: '300',
+    marginBottom: 8,
   },
   itemPrice: {
-    fontWeight: '400',
+    fontWeight: '500',
   },
   itemImage: {
     height: 90,
     width: 100,
     resizeMode: 'cover',
-    position: 'absolute',
-    top: 15,
-    right: 15,
     borderRadius: 10,
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 32,
+    paddingHorizontal: 24,
+    gap: 12,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: colors.muted,
+    fontSize: 14,
   },
 });

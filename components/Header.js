@@ -1,71 +1,64 @@
-import { useContext, useState, useEffect } from "react";
-import { View, Image, StyleSheet, Pressable } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { UserContext } from "../contexts/UserContext";
+import { View, Image, StyleSheet, Pressable } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useUser } from '../contexts/UserContext';
+import { colors } from '../theme/colors';
 
-const Header = ({ imageUpdate, screen, discardChanges }) => {
+const Header = ({ previewImage, screen, onBack }) => {
   const navigation = useNavigation();
-  const { user } = useContext(UserContext);
-  const [image, setImage] = useState(null);
-
-  useEffect(() => {
-    setImage(user.image);
-  }, [user.image]);
+  const { user } = useUser();
+  const image = previewImage !== undefined ? previewImage : user.image;
+  const showBack = screen === 'Profile';
+  const showAvatar = screen !== 'Onboarding';
 
   return (
     <View style={styles.header}>
-      {screen !== 'Onboarding' && screen !== 'Home' && (
+      {showBack ? (
         <Pressable
           style={styles.backBtn}
           onPress={() => {
-            if (screen === 'Profile') {
-              discardChanges();
-            }
-            navigation.goBack();
+            onBack?.();
+            navigation.navigate('Home');
           }}
         >
           <Image
             source={require('../assets/images/back-arrow.png')}
-            accessible={true}
-            accessibilityLabel={'back button'}
+            accessible
+            accessibilityLabel="Back"
           />
         </Pressable>
+      ) : (
+        <View style={styles.sideSlot} />
       )}
 
-      <Pressable 
-        style={styles.logo} 
-        onPress={() => {
-          if (screen !== 'Onboarding') {
-            navigation.navigate("Home");
-          }
-        }}
-      > 
-        <Image 
+      <Pressable
+        style={styles.logo}
+        disabled={screen === 'Onboarding'}
+        onPress={() => navigation.navigate('Home')}
+      >
+        <Image
           source={require('../assets/images/logo.png')}
-          accessible={true}
-          accessibilityLabel={'Little Lemon Logo'}
+          accessible
+          accessibilityLabel="Little Lemon Logo"
           style={styles.logoImg}
+          resizeMode="contain"
         />
-      </Pressable> 
+      </Pressable>
 
-      {screen !== 'Onboarding' && (
-        <Pressable onPress={() => navigation.navigate("Profile")}> 
-          {image ? (
-            <Image 
-              style={styles.avatar} 
-              accessible={true} 
-              accessibilityLabel={'avatar'} 
-              source={{ uri: image }}
-            />
-          ) : (
-            <Image 
-              style={styles.avatar} 
-              accessible={true} 
-              accessibilityLabel={'avatar'} 
-              source={require('../assets/images/avatar.png')}
-            />
-          )}
-        </Pressable> 
+      {showAvatar ? (
+        <Pressable onPress={() => navigation.navigate('Profile')}>
+          <Image
+            style={styles.avatar}
+            accessible
+            accessibilityLabel="Profile"
+            source={
+              image
+                ? { uri: image }
+                : require('../assets/images/avatar.png')
+            }
+          />
+        </Pressable>
+      ) : (
+        <View style={styles.sideSlot} />
       )}
     </View>
   );
@@ -77,36 +70,39 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'row',
     width: '100%',
-    backgroundColor: '#fff',
+    backgroundColor: colors.white,
     height: 70,
     paddingHorizontal: 20,
   },
+  sideSlot: {
+    width: 50,
+    height: 50,
+  },
   logo: {
-    height: '60%',
-    width: '50%',
-    resizeMode: "cover",
-    alignSelf: 'center',
-    margin: 'auto',
+    flex: 1,
+    height: 42,
+    marginHorizontal: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logoImg: {
-    width: '100%'
+    width: '100%',
+    height: '100%',
   },
   backBtn: {
     alignItems: 'center',
     justifyContent: 'center',
     width: 40,
     height: 40,
-    borderRadius: '100%',
-    backgroundColor: '#495E57',
+    borderRadius: 20,
+    backgroundColor: colors.primary,
   },
   avatar: {
-    alignItems: 'center',
-    justifyContent: 'center',
     width: 50,
     height: 50,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.white,
     borderRadius: 25,
-  }
+  },
 });
 
 export default Header;

@@ -27,6 +27,7 @@ yarn-error.*
 
 # macOS
 .DS_Store
+**/.DS_Store
 *.pem
 
 # dotenv environment variables
@@ -34,8 +35,3 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
-
-# Expo
-.expo
-dist/
-web-build/

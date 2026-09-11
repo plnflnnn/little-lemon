@@ -1,105 +1,107 @@
-import { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Pressable, Alert } from 'react-native';
-import { validateEmail } from '../utils';
+import { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
+import Constants from 'expo-constants';
+import { validateEmail, validateName } from '../utils';
 import Header from '../components/Header';
-import { multiSetData } from '../utils/asyncstorage';
-import Constants from "expo-constants";
+import { useUser } from '../contexts/UserContext';
+import { colors } from '../theme/colors';
 
-const Onboarding = ({ handleSignIn }) => {
-  const [name, setName] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
+const Onboarding = () => {
+  const { signIn, user } = useUser();
+  const [firstName, setFirstName] = useState(user.firstName || '');
+  const [email, setEmail] = useState(user.email || '');
+  const [submitting, setSubmitting] = useState(false);
 
-  const isValid = validateEmail(email) && (name.trim().length > 0 || /\d+/.test(name));
+  const isValid = validateEmail(email) && validateName(firstName);
 
-  function setFirstAndLastName() {
-    const nameArray = name.trim().split(' ');
-    if (nameArray.length >= 2) {
-      setFirstName(nameArray[0]);
-      setLastName(nameArray[1]);
-    } else {
-      setFirstName(name);
-      setLastName('');
+  const handleNext = async () => {
+    if (!isValid || submitting) {
+      return;
     }
-  }
 
-  useEffect(() => {
-    setFirstAndLastName();
-  }, [name]);
-
-  const saveUser = async () => {
-    await multiSetData([
-      ['isSignedIn', 'true'],
-      ['firstName', firstName],
-      ['lastName', lastName],
-      ['email', email],
-      ['phone', ''],
-      ['orderStates', 'true'],
-      ['passwordChanges', 'true'],
-      ['specialOrders', 'true'],
-      ['newsletters', 'true'],
-      ['image', '']
-    ]);
-    Alert.alert(`Nice to meet you, ${firstName}`);
+    try {
+      setSubmitting(true);
+      await signIn({ firstName: firstName.trim(), email: email.trim() });
+    } catch (e) {
+      Alert.alert('Could not save your profile', e.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <View style={styles.mainContainer}>
-      <Header avatarImage={false} screen={'Onboarding'} />
-      <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.mainContainer}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <Header screen="Onboarding" />
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.form}>
           <Text style={styles.title}>Are you hungry?</Text>
-          <Text style={styles.label}>First Name</Text>
+          <Text style={styles.label}>First name</Text>
           <TextInput
             style={styles.input}
-            value={name}
-            onChangeText={setName}
-            placeholder={'John Doe'}
-            keyboardType={'default'}
-            clearButtonMode={'while-editing'}
+            value={firstName}
+            onChangeText={setFirstName}
+            placeholder="Tilly"
+            placeholderTextColor={colors.border}
+            keyboardType="default"
+            textContentType="givenName"
+            autoComplete="given-name"
+            clearButtonMode="while-editing"
           />
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
             value={email}
             onChangeText={setEmail}
-            placeholder={'Type your email'}
-            keyboardType={'email-address'}
+            placeholder="example@email.com"
+            placeholderTextColor={colors.border}
+            keyboardType="email-address"
             textContentType="emailAddress"
-            clearButtonMode={'while-editing'}
+            autoComplete="email"
+            autoCapitalize="none"
+            clearButtonMode="while-editing"
           />
         </View>
 
         <Pressable
-          style={[styles.button, !isValid && { opacity: 0.5 }]}
-          disabled={!isValid}
-          onPress={async () => {
-            await saveUser();
-            handleSignIn();
-          }}
+          style={[styles.button, !isValid && styles.buttonDisabled]}
+          disabled={!isValid || submitting}
+          onPress={handleNext}
         >
-          <Text style={styles.buttonTxt}>Next</Text>
+          <Text style={styles.buttonTxt}>{submitting ? 'Saving...' : 'Next'}</Text>
         </Pressable>
-      </View>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: colors.white,
     paddingTop: Constants.statusBarHeight,
   },
   container: {
-    flexDirection: 'column',
+    flexGrow: 1,
     justifyContent: 'space-between',
     padding: 20,
+    paddingBottom: 40,
   },
   form: {
     justifyContent: 'center',
-    width: '100%'
+    width: '100%',
   },
   title: {
     textAlign: 'center',
@@ -118,20 +120,25 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingHorizontal: 10,
     fontSize: 16,
-    borderColor: "#ccc",
+    borderColor: colors.border,
   },
   button: {
     alignSelf: 'flex-end',
     borderRadius: 8,
     borderWidth: 1,
     padding: 10,
-    borderColor: "#ccc",
+    borderColor: colors.border,
+    backgroundColor: colors.primary,
     width: '30%',
+  },
+  buttonDisabled: {
+    opacity: 0.5,
   },
   buttonTxt: {
     textAlign: 'center',
     fontSize: 16,
-  }
+    color: colors.white,
+  },
 });
 
 export default Onboarding;
