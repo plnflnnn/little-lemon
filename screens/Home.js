@@ -105,7 +105,7 @@ export default function Home() {
   const listHeader = useMemo(
     () => (
       <>
-        <Header screen="Home" />
+        <Header />
         <Hero />
         <Searchbar
           placeholder="Search"

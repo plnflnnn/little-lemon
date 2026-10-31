@@ -44,7 +44,7 @@ const Onboarding = () => {
       style={styles.mainContainer}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Header screen="Onboarding" />
+      <Header />
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.form}>
           <Text style={styles.title}>Are you hungry?</Text>

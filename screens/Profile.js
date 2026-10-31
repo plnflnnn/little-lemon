@@ -19,6 +19,7 @@ import Header from '../components/Header';
 import { useUser } from '../contexts/UserContext';
 import { validateEmail, validateName, validatePhone } from '../utils';
 import { colors } from '../theme/colors';
+import { DEFAULT_AVATAR, getAvatarSource } from '../utils/avatar';
 
 const NOTIFICATIONS = [
   { label: 'Order statuses', key: 'orderStates' },
@@ -31,9 +32,11 @@ function Profile() {
   const { user, saveUser, logout } = useUser();
   const [editedUser, setEditedUser] = useState(user);
   const [saving, setSaving] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
 
   useEffect(() => {
     setEditedUser(user);
+    setImageFailed(false);
   }, [user]);
 
   const updateField = (key, value) => {
@@ -94,6 +97,7 @@ function Profile() {
     });
 
     if (!result.canceled) {
+      setImageFailed(false);
       updateField('image', result.assets[0].uri);
     }
   };
@@ -120,11 +124,7 @@ function Profile() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Header
-          previewImage={editedUser.image}
-          screen="Profile"
-          onBack={discardChanges}
-        />
+        <Header previewImage={editedUser.image} onBack={discardChanges} />
         <View style={styles.container}>
           <Text style={styles.title}>Personal information</Text>
           <Text style={styles.label}>Avatar</Text>
@@ -132,11 +132,17 @@ function Profile() {
           <View style={styles.avatarSection}>
             <Image
               style={styles.avatar}
+              resizeMode="cover"
               source={
-                editedUser.image
-                  ? { uri: editedUser.image }
-                  : require('../assets/images/avatar.png')
+                editedUser.image && !imageFailed
+                  ? getAvatarSource(editedUser.image)
+                  : DEFAULT_AVATAR
               }
+              onError={() => {
+                if (editedUser.image) {
+                  setImageFailed(true);
+                }
+              }}
             />
 
             <Pressable style={styles.avatarBtn} onPress={pickImage}>
@@ -277,7 +283,7 @@ const styles = StyleSheet.create({
   avatarSection: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    alignItems: 'flex-end',
+    alignItems: 'center',
     width: '100%',
   },
   avatar: {
@@ -285,6 +291,8 @@ const styles = StyleSheet.create({
     height: 80,
     marginRight: 20,
     borderRadius: 40,
+    backgroundColor: colors.grey,
+    overflow: 'hidden',
   },
   avatarBtn: {
     width: 80,
